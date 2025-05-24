@@ -1,0 +1,189 @@
+paths:
+  /employees:
+    get:
+      tags: [Employees]
+      summary: Получить список сотрудников
+      parameters:
+        - $ref: '#/components/parameters/activeOnly'
+      responses:
+        200:
+          description: Список сотрудников
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Employee'
+
+    post:
+      tags: [Employees]
+      summary: Создать нового сотрудника
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmployeeRequest'
+      responses:
+        201:
+          description: Сотрудник создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+  /employees/{id}:
+    get:
+      tags: [Employees]
+      summary: Получить сотрудника по ID
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        200:
+          description: Данные сотрудника
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+    put:
+      tags: [Employees]
+      summary: Обновить данные сотрудника
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmployeeRequest'
+      responses:
+        200:
+          description: Данные обновлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+
+    delete:
+      tags: [Employees]
+      summary: Удалить сотрудника
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/idPath'
+      responses:
+        204:
+          description: Сотрудник удален
+
+components:
+  schemas:
+    Employee:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+          example: "Иван"
+        lastName:
+          type: string
+          example: "Петров"
+        middleName:
+          type: string
+          nullable: true
+          example: "Сергеевич"
+        birthDate:
+          type: string
+          format: date
+          example: "1990-05-15"
+        hireDate:
+          type: string
+          format: date
+          example: "2020-01-10"
+        terminationDate:
+          type: string
+          format: date
+          nullable: true
+        positionId:
+          type: string
+          format: uuid
+        createdBy:
+          type: string
+          format: uuid
+          nullable: true
+          description: "Кто добавил сотрудника (null для первого)"
+        createdAt:
+          type: string
+          format: date-time
+        email:
+          type: string
+          format: email
+          example: "i.petrov@flowershop.ru"
+
+    CreateEmployeeRequest:
+      type: object
+      required: [firstName, lastName, birthDate, hireDate, positionId, email]
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 50
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 50
+        middleName:
+          type: string
+          nullable: true
+        birthDate:
+          type: string
+          format: date
+        hireDate:
+          type: string
+          format: date
+        positionId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+
+    UpdateEmployeeRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 50
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 50
+        middleName:
+          type: string
+          nullable: true
+        terminationDate:
+          type: string
+          format: date
+          nullable: true
+        positionId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+
+  parameters:
+    activeOnly:
+      name: activeOnly
+      in: query
+      schema:
+        type: boolean
+        default: true
+      description: Показывать только действующих сотрудников

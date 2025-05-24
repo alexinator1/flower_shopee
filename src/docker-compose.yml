@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile  # Путь относительно context
+    ports:
+      - "8080:8080"
+      - "40000:40000"  # Порт для дебаггера
+    environment:
+      DB_HOST: db
+      DB_PORT: ${POSTGRES_PORT}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      APP_ENV: ${API_ENV}
+    env_file:
+      - .env
+    volumes:
+      - ./api:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  frontend:
+    build:
+      dockerfile: docker/frontend/Dockerfile
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    environment:
+      VITE_API_URL: http://localhost:${API_PORT}
+    env_file:
+      - .env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  migrations:
+    image: migrate/migrate
+    environment:
+      DB_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+    volumes:
+      - ./docker/db/migrations:/migrations
+    command: ["-path", "/migrations", "-database", "${DB_URL}", "up"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+
+volumes:
+  postgres_data:

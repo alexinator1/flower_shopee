@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info:
+  title: Flower Shop API
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+
+# Импорт компонентов
+components:
+  schemas:
+    $ref: './components/base.yaml#/components/schemas'
+  responses:
+    $ref: './components/responses.yaml#/components/responses'
+
+# Импорт путей
+paths:
+  /products:
+    $ref: './components/products.yaml#/paths/~1products'
+  /stock-items:
+    $ref: './components/stock-items.yaml#/paths/~1stock-items'
+  /employee:
+    $ref: './components/employee.yaml#/paths/~1employees'

@@ -1,0 +1,311 @@
+paths:
+  /stock-items:
+    get:
+      tags: [Stock]
+      summary: Получить список товаров на складе
+      parameters:
+        - name: shopId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [reserved, paid, in_stock, on_display, sold]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        200:
+          description: Список товаров
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StockItem'
+
+    post:
+      tags: [Stock]
+      summary: Добавить товар на склад
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStockItemRequest'
+      responses:
+        201:
+          description: Товар добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockItem'
+
+  /stock-items/{id}:
+    get:
+      tags: [Stock]
+      summary: Получить товар по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Данные товара
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockItem'
+
+    put:
+      tags: [Stock]
+      summary: Обновить данные товара
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStockItemRequest'
+      responses:
+        200:
+          description: Данные обновлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockItem'
+
+    delete:
+      tags: [Stock]
+      summary: Удалить товар со склада
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Товар удален
+
+  /stock-items/{id}/sell:
+    post:
+      tags: [Stock]
+      summary: Пометить товар как проданный
+      description: |
+        Переводит статус в "sold", создает запись в SoldItems
+        и возвращает данные проданного товара
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [saleId]
+              properties:
+                saleId:
+                  type: string
+                  format: uuid
+                  description: "ID продажи"
+                actualSellingPrice:
+                  type: number
+                  format: float
+                  description: "Фактическая цена продажи"
+      responses:
+        200:
+          description: Товар продан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SoldItem'
+
+components:
+  schemas:
+    StockItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        name:
+          type: string
+          example: "Роза красная (экспресс-доставка)"
+        description:
+          type: string
+          nullable: true
+        productId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [reserved, paid, in_stock, on_display, sold]
+        supplyId:
+          type: string
+          format: uuid
+          nullable: true
+        employeeId:
+          type: string
+          format: uuid
+        shopId:
+          type: string
+          format: uuid
+        purchasePrice:
+          type: number
+          format: float
+          example: 150.50
+        sellingPrice:
+          type: number
+          format: float
+          example: 350.00
+        saleId:
+          type: string
+          format: uuid
+          nullable: true
+        shiftId:
+          type: string
+          format: uuid
+        bouquetId:
+          type: string
+          format: uuid
+          nullable: true
+        isBouquet:
+          type: boolean
+          default: false
+
+    CreateStockItemRequest:
+      type: object
+      required: [productId, shopId, purchasePrice, sellingPrice]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [reserved, paid, in_stock, on_display, sold]
+          default: "in_stock"
+        supplyId:
+          type: string
+          format: uuid
+          nullable: true
+        shopId:
+          type: string
+          format: uuid
+        purchasePrice:
+          type: number
+          format: float
+          minimum: 0
+        sellingPrice:
+          type: number
+          format: float
+          minimum: 0
+        bouquetId:
+          type: string
+          format: uuid
+          nullable: true
+        isBouquet:
+          type: boolean
+          default: false
+
+    UpdateStockItemRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [reserved, paid, in_stock, on_display, sold]
+        sellingPrice:
+          type: number
+          format: float
+          minimum: 0
+        saleId:
+          type: string
+          format: uuid
+          nullable: true
+
+    SoldItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        stockItemId:
+          type: string
+          format: uuid
+          description: "Оригинальный ID со склада"
+        saleId:
+          type: string
+          format: uuid
+        soldAt:
+          type: string
+          format: date-time
+        productId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        purchasePrice:
+          type: number
+          format: float
+        actualSellingPrice:
+          type: number
+          format: float
+        shopId:
+          type: string
+          format: uuid
+        employeeId:
+          type: string
+          format: uuid
+          description: "Кто продал"
+        bouquetId:
+          type: string
+          format: uuid
+          nullable: true
+        isBouquet:
+          type: boolean
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

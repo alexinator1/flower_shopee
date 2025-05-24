@@ -1,0 +1,200 @@
+paths:
+  /products:
+    get:
+      tags: [Products]
+      summary: Получить список товаров
+      parameters:
+        - in: query
+          name: categoryId
+          schema:
+            type: string
+            format: uuid
+          description: Фильтр по ID категории
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+          description: Лимит записей
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          description: Смещение
+      responses:
+        200:
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags: [Products]
+      summary: Создать новый товар
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        201:
+          description: Товар создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /products/{id}:
+    get:
+      tags: [Products]
+      summary: Получить товар по ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Products]
+      summary: Обновить товар
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+      responses:
+        200:
+          description: Товар обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        400:
+          $ref: '#/components/responses/BadRequest'
+
+    delete:
+      tags: [Products]
+      summary: Удалить товар
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Товар удален
+        404:
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    Product:
+      type: object
+      allOf:
+        - $ref: '/base.yaml/#/components/schemas/BaseEntity'
+      properties:
+        name:
+          type: string
+          example: "Роза красная"
+        description:
+          type: string
+          example: "Свежая красная роза, длина стебля 50см"
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "123e4567-e89b-12d3-a456-426614174000"
+          description: "ID родительской категории (null для корневых)"
+        createdBy:
+          type: string
+          format: uuid
+          description: "ID сотрудника, создавшего запись"
+
+    CreateProductRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: "Роза красная"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Свежая красная роза"
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+          example: null
+
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: "Роза красная премиум"
+        description:
+          type: string
+          maxLength: 1000
+          example: "Свежая красная роза, длина 60см"
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+          example: "123e4567-e89b-12d3-a456-426614174000"
+
+  responses:
+    BadRequest:
+      description: Неверный запрос
+    Unauthorized:
+      description: Не авторизован
+    Forbidden:
+      description: Нет прав доступа
+    NotFound:
+      description: Товар не найден
+    ServerError:
+      description: Ошибка сервера
