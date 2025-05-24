@@ -1,0 +1,124 @@
+openapi: 3.0.3
+info:
+  title: Flower Business Management API
+  version: 1.0.0
+  description: API для админки и Windows-приложения управления цветочным бизнесом.
+
+servers:
+  - url: http://localhost:8080/api
+
+paths:
+  /employees:
+    get:
+      summary: Получить список сотрудников
+      tags: [Employees]
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Employee'
+    post:
+      summary: Создать сотрудника
+      tags: [Employees]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
+      responses:
+        '201':
+          description: Сотрудник создан
+
+  /employees/{id}:
+    get:
+      summary: Получить сотрудника по ID
+      tags: [Employees]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+    put:
+      summary: Обновить сотрудника
+      tags: [Employees]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
+      responses:
+        '200':
+          description: Обновлено
+    delete:
+      summary: Удалить сотрудника
+      tags: [Employees]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Удалено
+
+components:
+  schemas:
+    Employee:
+      type: object
+      required:
+        - first_name
+        - last_name
+        - position_id
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+        last_name:
+          type: string
+        middle_name:
+          type: string
+        birth_date:
+          type: string
+          format: date
+        hire_date:
+          type: string
+          format: date
+        fire_date:
+          type: string
+          format: date
+          nullable: true
+        position_id:
+          type: integer
+        photo_url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
