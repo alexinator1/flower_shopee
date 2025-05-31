@@ -4,11 +4,54 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
+          example: 1234
         createdAt:
           type: string
           format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Item:
+      allOf:
+        - $ref: './base.yaml#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            name:
+              type: string
+              example: "Роза красная (экспресс-доставка)"
+            description:
+              type: string
+              nullable: true
+            productId:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [ reserved, paid, in_stock, on_display, sold, write_off ]
+            supplyId:
+              type: integer
+              format: int64
+              nullable: true
+            employeeId:
+              type: integer
+              format: int64
+            shopId:
+              type: integer
+              format: int64
+            purchasePrice:
+              type: number
+              format: float
+              example: 150.50
+            compositionId:
+              type: string
+              format: uuid
+              nullable: true
+            isComposition:
+              type: boolean
+              default: false
 
     ErrorResponse:
       type: object

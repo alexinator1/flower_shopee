@@ -34,9 +34,9 @@ generate:
 	@echo "Code generation completed!"
 
 ## docker-up: Запуск Docker-окружения
-docker-up:
+up:
 	@echo "Starting Docker containers..."
-	@docker-compose -f docker/docker-compose.yml up -d --build
+	@docker-compose -f docker-compose.yml up -d --build
 
 ## test: Запускает тесты
 test:

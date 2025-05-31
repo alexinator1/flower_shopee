@@ -157,62 +157,18 @@ paths:
 components:
   schemas:
     StockItem:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: "123e4567-e89b-12d3-a456-426614174000"
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        name:
-          type: string
-          example: "Роза красная (экспресс-доставка)"
-        description:
-          type: string
-          nullable: true
-        productId:
-          type: string
-          format: uuid
-        status:
-          type: string
-          enum: [reserved, paid, in_stock, on_display, sold]
-        supplyId:
-          type: string
-          format: uuid
-          nullable: true
-        employeeId:
-          type: string
-          format: uuid
-        shopId:
-          type: string
-          format: uuid
-        purchasePrice:
-          type: number
-          format: float
-          example: 150.50
-        sellingPrice:
-          type: number
-          format: float
-          example: 350.00
-        saleId:
-          type: string
-          format: uuid
-          nullable: true
-        shiftId:
-          type: string
-          format: uuid
-        bouquetId:
-          type: string
-          format: uuid
-          nullable: true
-        isBouquet:
-          type: boolean
-          default: false
+      allOf:
+        - $ref: './base.yaml#/components/schemas/Item'
+        - type: object
+          properties:
+            sellingPrice:
+              type: number
+              format: float
+              example: 350.00
+            saleId:
+              type: integer
+              format: int64
+              nullable: true
 
     CreateStockItemRequest:
       type: object
@@ -264,45 +220,16 @@ components:
           nullable: true
 
     SoldItem:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        stockItemId:
-          type: string
-          format: uuid
-          description: "Оригинальный ID со склада"
-        saleId:
-          type: string
-          format: uuid
-        soldAt:
-          type: string
-          format: date-time
-        productId:
-          type: string
-          format: uuid
-        name:
-          type: string
-        purchasePrice:
-          type: number
-          format: float
-        actualSellingPrice:
-          type: number
-          format: float
-        shopId:
-          type: string
-          format: uuid
-        employeeId:
-          type: string
-          format: uuid
-          description: "Кто продал"
-        bouquetId:
-          type: string
-          format: uuid
-          nullable: true
-        isBouquet:
-          type: boolean
+      allOf:
+        - $ref: './base.yaml#/components/schemas/Item'
+        - type: object
+          properties:
+            saleId:
+              type: string
+              format: uuid
+            soldAt:
+              type: string
+              format: date-time
 
   securitySchemes:
     bearerAuth:

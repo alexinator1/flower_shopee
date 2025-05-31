@@ -6,12 +6,17 @@ info:
 servers:
   - url: /api/v1
 
+
+
 # Импорт компонентов
 components:
   schemas:
     $ref: './components/base.yaml#/components/schemas'
-  responses:
-    $ref: './components/responses.yaml#/components/responses'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
 # Импорт путей
 paths:

@@ -1,18 +1,19 @@
-FROM golang:1.24-bookworm AS dev
+FROM golang:1.23-bullseye AS dev
 
 WORKDIR /app
-COPY src/api/go.mod src/api/go.sum ./
+
+# Копируем файлы go.mod и go.sum из ./api/
+COPY api/go.mod api/go.sum ./
 RUN go mod download
 
-# Устанавливаем Delve (дебаггер для Go)
+# Устанавливаем Delve (отладчик)
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
-# Копируем исходный код
-COPY src/api/ .
+# Копируем весь исходный код из ./api/
+COPY api/ .
 
-# Собираем с отладочной информацией
+# Собираем с флагами отладки
 RUN go build -gcflags="all=-N -l" -o /flower-shop-api
 
-# Запускаем дебаггер
 EXPOSE 40000 8080
 CMD ["/go/bin/dlv", "exec", "/flower-shop-api", "--headless", "--listen=:40000", "--api-version=2", "--accept-multiclient"]

@@ -39,7 +39,12 @@ paths:
       tags: [Employees]
       summary: Получить сотрудника по ID
       parameters:
-        - $ref: '#/components/parameters/idPath'
+        - in: query
+          name: employeeId
+          schema:
+            type: integer
+            format: int64
+          description: Фильтр по ID категории
       responses:
         200:
           description: Данные сотрудника
@@ -54,7 +59,12 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/idPath'
+        - in: query
+          name: employeeId
+          schema:
+            type: integer
+            format: int64
+          description: Фильтр по ID категории
       requestBody:
         required: true
         content:
@@ -75,7 +85,11 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/idPath'
+        - in: query
+          name: employeeId
+          schema:
+            type: integer
+            format: int64
       responses:
         204:
           description: Сотрудник удален
@@ -83,48 +97,44 @@ paths:
 components:
   schemas:
     Employee:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        firstName:
-          type: string
-          example: "Иван"
-        lastName:
-          type: string
-          example: "Петров"
-        middleName:
-          type: string
-          nullable: true
-          example: "Сергеевич"
-        birthDate:
-          type: string
-          format: date
-          example: "1990-05-15"
-        hireDate:
-          type: string
-          format: date
-          example: "2020-01-10"
-        terminationDate:
-          type: string
-          format: date
-          nullable: true
-        positionId:
-          type: string
-          format: uuid
-        createdBy:
-          type: string
-          format: uuid
-          nullable: true
-          description: "Кто добавил сотрудника (null для первого)"
-        createdAt:
-          type: string
-          format: date-time
-        email:
-          type: string
-          format: email
-          example: "i.petrov@flowershop.ru"
+      allOf:
+        - $ref: './base.yaml#/components/schemas/BaseEntity'
+        - type: object
+          properties:
+            firstName:
+              type: string
+              example: "Иван"
+            lastName:
+              type: string
+              example: "Петров"
+            middleName:
+              type: string
+              nullable: true
+              example: "Сергеевич"
+            birthDate:
+              type: string
+              format: date
+              example: "1990-05-15"
+            hireDate:
+              type: string
+              format: date
+              example: "2020-01-10"
+            terminationDate:
+              type: string
+              format: date
+              nullable: true
+            positionId:
+              type: integer
+              format: format64
+            createdBy:
+              type: string
+              format: uuid
+              nullable: true
+              description: "Кто добавил сотрудника (null для первого)"
+            email:
+              type: string
+              format: email
+              example: "i.petrov@flowershop.ru"
 
     CreateEmployeeRequest:
       type: object

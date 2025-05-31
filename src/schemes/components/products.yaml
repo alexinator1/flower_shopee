@@ -7,8 +7,8 @@ paths:
         - in: query
           name: categoryId
           schema:
-            type: string
-            format: uuid
+            type: integer
+            format: int64
           description: Фильтр по ID категории
         - in: query
           name: limit
@@ -140,15 +140,11 @@ components:
           type: string
           example: "Свежая красная роза, длина стебля 50см"
         parentId:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
           nullable: true
-          example: "123e4567-e89b-12d3-a456-426614174000"
+          example: ""
           description: "ID родительской категории (null для корневых)"
-        createdBy:
-          type: string
-          format: uuid
-          description: "ID сотрудника, создавшего запись"
 
     CreateProductRequest:
       type: object
@@ -164,8 +160,8 @@ components:
           maxLength: 1000
           example: "Свежая красная роза"
         parentId:
-          type: string
-          format: uuid
+          type: integer
+          format: int64
           nullable: true
           example: null
 
